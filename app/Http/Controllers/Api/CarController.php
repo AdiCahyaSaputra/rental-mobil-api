@@ -35,14 +35,24 @@ class CarController extends Controller
   public function index()
   {
     $data = DB::table('cars')
-      ->join('car_descriptions', 'cars.id', 
-        '=', 'car_descriptions.car_id')
-      ->join('users', 'cars.owner_id', 
-        '=', 'users.id')
-      ->select(['cars.brand_car', 
-        'car_descriptions.color', 
-        'car_descriptions.car_model_year', 
-        'users.name'])->get();
+      ->join(
+        'car_descriptions',
+        'cars.id',
+        '=',
+        'car_descriptions.car_id'
+      )
+      ->join(
+        'users',
+        'cars.owner_id',
+        '=',
+        'users.id'
+      )
+      ->select([
+        'cars.id', 'cars.brand_car',
+        'car_descriptions.color',
+        'car_descriptions.car_model_year',
+        'users.name'
+      ])->get();
 
     // $data = DB::table('cars')
     //   ->join('car_descriptions', 'cars.id', 
@@ -217,7 +227,31 @@ class CarController extends Controller
    */
   public function show($carId)
   {
-    $data = Car::with('carDescription')->find($carId);
+    $data = DB::table('cars')
+      ->join(
+        'car_descriptions',
+        'cars.id',
+        '=',
+        'car_descriptions.car_id'
+      )
+      ->join(
+        'users',
+        'cars.owner_id',
+        '=',
+        'users.id'
+      )
+      ->select([
+        'cars.id', 'cars.brand_car',
+        'car_descriptions.color',
+        'car_descriptions.car_model_year',
+        'car_descriptions.capacity',
+        'car_descriptions.no_plate',
+        'users.name',
+        'users.address',
+        'users.email',
+        'users.mobile_phone',
+      ])->where('cars.id', $carId)->get();
+
     if ($data != null) {
       return response()->json([
         'message' => 'Success',
