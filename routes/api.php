@@ -3,6 +3,8 @@
 use App\Http\Controllers\Api\CarController;
 use App\Http\Controllers\Api\RentController;
 use App\Http\Controllers\Api\UserController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -27,6 +29,38 @@ Route::prefix('v1')->group(function () {
       return response()->json([
         'message' => 'Valid bang token nya'
       ]);
+    })->middleware('auth:api');
+
+    Route::get('/car', function () {
+      $data = DB::table('cars')
+        ->join(
+          'car_descriptions',
+          'cars.id',
+          '=',
+          'car_descriptions.car_id'
+        )
+        ->join(
+          'users',
+          'cars.owner_id',
+          '=',
+          'users.id'
+        )
+        ->select([
+          'cars.id', 'cars.brand_car',
+          'car_descriptions.color',
+          'car_descriptions.car_model_year',
+        ])->where('users.id', Auth::id())->get();
+
+      if (count($data)) {
+        return response()->json([
+          'message' => 'success',
+          'data' => $data
+        ], 200);
+      }
+
+      return response()->json([
+        'message' => 'failed, data not found'
+      ], 404);
     })->middleware('auth:api');
   });
 
